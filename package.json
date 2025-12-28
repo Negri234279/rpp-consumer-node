@@ -1,0 +1,28 @@
+{
+  "name": "rpp-consumer-node",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start:prod": "node src/main.js",
+    "start:dev": "nodemon src/main.js",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "amqplib": "0.10.9",
+    "dotenv": "17.2.3"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "20.2.0",
+    "@commitlint/config-conventional": "20.2.0",
+    "@semantic-release/changelog": "6.0.3",
+    "@semantic-release/commit-analyzer": "13.0.1",
+    "@semantic-release/git": "10.0.1",
+    "@semantic-release/github": "11.0.6",
+    "@semantic-release/release-notes-generator": "14.1.0",
+    "@types/amqplib": "0.10.8",
+    "husky": "9.1.7",
+    "nodemon": "3.1.11",
+    "semantic-release": "24.2.9"
+  }
+}
