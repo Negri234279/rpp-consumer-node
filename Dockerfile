@@ -48,9 +48,8 @@ CMD ["npm", "run", "start:dev"]
 FROM base AS prod
 
 ENV NODE_ENV="production"
-ENV HUSKY=0
 
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts
 
 COPY src ./src
 
