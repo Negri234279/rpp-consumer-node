@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.0.1...v1.1.0) (2025-12-28)
+
+
+### Features
+
+* implement RabbitMQ consumer with logging and message handling ([90ac80c](https://github.com/Negri234279/rpp-consumer-node/commit/90ac80ca201d4407b21daaad55c5eeee0f38589d))
+
 ## [1.0.1](https://github.com/Negri234279/rpp-consumer-node/compare/v1.0.0...v1.0.1) (2025-12-28)
 
 
