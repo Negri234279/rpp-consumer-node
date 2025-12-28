@@ -17,12 +17,6 @@ LABEL \
 
 ENV TZ="Europe/Madrid"
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    curl \
-    tzdata \
-    && rm -rf /var/lib/apt/lists/*
-
 RUN groupadd -r runner && useradd -r -g runner runner \
     && mkdir -p /app /app/logs \
     && chown -R runner:runner /app
@@ -54,6 +48,7 @@ CMD ["npm", "run", "start:dev"]
 FROM base AS prod
 
 ENV NODE_ENV="production"
+ENV HUSKY=0
 
 RUN npm ci --omit=dev
 
