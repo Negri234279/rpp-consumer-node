@@ -8,18 +8,18 @@ export class PrometheusMetrics {
 
         this.alarmsTotal = new Counter({
             name: 'rust_alarms_total',
-            help: 'Número total de alarmas recibidas',
+            help: 'Total number of alarms received',
         })
 
         this.alarmsByServer = new Counter({
             name: 'rust_alarms_by_server',
-            help: 'Alarmas por servidor con fecha',
-            labelNames: ['server', 'date'],
+            help: 'Server alarms',
+            labelNames: ['server'],
         })
 
         this.alarmsByDay = new Counter({
             name: 'rust_alarms_by_day',
-            help: 'Alarmas por día',
+            help: 'Alarms per day',
             labelNames: ['date'],
         })
     }
@@ -29,7 +29,7 @@ export class PrometheusMetrics {
         this.alarmsByServer.inc({ server })
         this.alarmsByDay.inc({ date })
 
-        this.logger.info(`Métrica registrada para la alarma del servidor: ${server} en la fecha: ${date}`)
+        this.logger.info(`Metric registered for alarm from server: ${server} on date: ${date}`)
     }
 
     async metrics() {
