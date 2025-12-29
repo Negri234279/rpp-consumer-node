@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.1.0...v1.2.0) (2025-12-29)
+
+
+### Features
+
+* add Prometheus metrics integration and alarm recording functionality ([35c737a](https://github.com/Negri234279/rpp-consumer-node/commit/35c737ab764e047311a2ca0b523307b218c7a822))
+
 # [1.1.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.0.1...v1.1.0) (2025-12-28)
 
 
