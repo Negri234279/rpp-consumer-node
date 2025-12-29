@@ -44,6 +44,15 @@ async function shutdown(signal) {
 process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 
+process.on('uncaughtException', (err) => {
+    logger.error(err)
+    process.exit(1)
+})
+
+process.on('unhandledRejection', (err) => {
+    logger.error(err)
+})
+
 consumer.start().catch((err) => {
     logger.error(`Error fatal: ${err.message}`)
     process.exit(1)

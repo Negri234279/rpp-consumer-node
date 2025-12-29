@@ -17,7 +17,15 @@ export class Logger {
         this._write(chalk.cyan, 'INFO', msg)
     }
 
-    error(msg) {
+    error(err) {
+        let msg
+
+        if (err instanceof Error) {
+            msg = `${err.name}: ${err.message}\n${err.stack}`
+        } else {
+            msg = String(err)
+        }
+
         this._write(chalk.red, 'ERROR', msg)
     }
 
