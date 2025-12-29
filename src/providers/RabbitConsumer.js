@@ -14,7 +14,7 @@ export class RabbitConsumer {
 
     async start() {
         this.logger.info(`Conectando a RabbitMQ en ${this.url}`)
-        
+
         this.connection = await amqp.connect(this.url)
         this.channel = await this.connection.createChannel()
 

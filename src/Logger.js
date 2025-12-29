@@ -3,8 +3,9 @@ import path from 'node:path'
 import chalk from 'chalk'
 
 export class Logger {
-    constructor(logPath) {
+    constructor({ path: logPath }) {
         this.logPath = logPath
+
         fs.mkdirSync(path.dirname(logPath), { recursive: true })
     }
 

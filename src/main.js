@@ -1,30 +1,32 @@
-
-import dotenv from 'dotenv'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { Logger } from './Logger.js'
-import { RabbitConsumer } from './providers/RabbitConsumer.js'
+import { AlarmMetricsService } from './AlarmMetricsService.js'
 import { SmartAlarmHandler } from './handlers/SmartAlarmHandler.js'
-
-
-dotenv.config({ quiet: true })
+import { Logger } from './Logger.js'
+import { startMetricsServer } from './metricsServer.js'
+import { PrometheusMetrics } from './PrometheusMetrics.js'
+import { RabbitConsumer } from './providers/RabbitConsumer.js'
+import { RABBITMQ_URL } from './config.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const CONSUMER_LOG_PATH = path.resolve(__dirname, '../logs/rpp-consumer-node.log')
 
-const logger = new Logger(CONSUMER_LOG_PATH)
-const smartAlarmHandler = new SmartAlarmHandler(logger)
+const logger = new Logger({ path: CONSUMER_LOG_PATH })
+const metrics = new PrometheusMetrics({ logger })
 
-const RABBITMQ_URL = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`
+startMetricsServer({ metrics, logger })
+
+const alarmMetricsService = new AlarmMetricsService({ metrics })
+const smartAlarmHandler = new SmartAlarmHandler({ logger, alarmMetricsService })
 
 const consumer = new RabbitConsumer({
     url: RABBITMQ_URL,
     queue: 'rustplus_alarms',
     logger,
-    handler: smartAlarmHandler
+    handler: smartAlarmHandler,
 })
 
 async function shutdown(signal) {
@@ -42,7 +44,7 @@ async function shutdown(signal) {
 process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 
-consumer.start().catch(err => {
+consumer.start().catch((err) => {
     logger.error(`Error fatal: ${err.message}`)
     process.exit(1)
 })
