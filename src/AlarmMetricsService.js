@@ -1,11 +1,12 @@
 import { METRICS_ENABLED } from './config.js'
 
 export class AlarmMetricsService {
-    constructor({ metrics }) {
+    constructor({ metrics, logger }) {
         this.metrics = metrics
+        this.logger = logger
     }
 
-    record(alarm) {
+    async record(alarm) {
         if (!METRICS_ENABLED) return
 
         const date = new Date().toISOString().split('T')[0]
@@ -14,5 +15,7 @@ export class AlarmMetricsService {
             server: alarm.server,
             date,
         })
+
+        this.logger.info(`Alarm recorded for server: ${alarm.server} on date: ${date}`)
     }
 }

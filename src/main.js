@@ -2,12 +2,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { AlarmMetricsService } from './AlarmMetricsService.js'
+import { RABBITMQ_URL } from './config.js'
 import { SmartAlarmHandler } from './handlers/SmartAlarmHandler.js'
 import { Logger } from './Logger.js'
 import { startMetricsServer } from './metricsServer.js'
 import { PrometheusMetrics } from './PrometheusMetrics.js'
 import { RabbitConsumer } from './providers/RabbitConsumer.js'
-import { RABBITMQ_URL } from './config.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -19,7 +19,7 @@ const metrics = new PrometheusMetrics({ logger })
 
 startMetricsServer({ metrics, logger })
 
-const alarmMetricsService = new AlarmMetricsService({ metrics })
+const alarmMetricsService = new AlarmMetricsService({ metrics, logger })
 const smartAlarmHandler = new SmartAlarmHandler({ logger, alarmMetricsService })
 
 const consumer = new RabbitConsumer({
@@ -27,6 +27,7 @@ const consumer = new RabbitConsumer({
     queue: 'rustplus_alarms',
     logger,
     handler: smartAlarmHandler,
+    prometheusMetrics: metrics,
 })
 
 async function shutdown(signal) {

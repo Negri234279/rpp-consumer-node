@@ -1,12 +1,15 @@
 import amqp from 'amqplib'
 
+import { METRICS_ENABLED } from '../config.js'
+
 export class RabbitConsumer {
-    constructor({ url, queue, exchange = null, logger, handler = null }) {
+    constructor({ url, queue, exchange = null, logger, handler = null, prometheusMetrics = null }) {
         this.url = url
         this.queue = queue
         this.exchange = exchange
         this.logger = logger
         this.handler = handler
+        this.prometheusMetrics = prometheusMetrics
 
         this.connection = null
         this.channel = null
@@ -26,9 +29,47 @@ export class RabbitConsumer {
         if (this.queue) {
             await this.channel.assertQueue(this.queue, { durable: true })
         }
+
+        this.running = true
     }
 
     async consume() {
+        if (!this.channel || !this.running) throw new Error('No conectado')
+
+        return await this.channel.consume(this.queue, async (msg) => {
+            if (!msg) {
+                this.logger.warn(`Mensaje vacío recibido en la queue "${this.queue}" - Payload "${msg}"`)
+                return
+            }
+
+            let start
+            const metricsEnabled = METRICS_ENABLED && !!this.prometheusMetrics
+
+            if (metricsEnabled) start = process.hrtime.bigint()
+
+            try {
+                const payload = JSON.parse(msg.content.toString())
+                await this.handler.handle(payload)
+
+                if (metricsEnabled) {
+                    const duration = Number(process.hrtime.bigint() - start) / 1e9
+                    this.prometheusMetrics.recordSuccess(duration)
+                }
+
+                this.channel.ack(msg)
+            } catch (err) {
+                if (metricsEnabled) {
+                    const duration = Number(process.hrtime.bigint() - start) / 1e9
+                    this.prometheusMetrics.recordFailure(duration)
+                }
+
+                this.channel.nack(msg, false, false)
+                this.logger.error(err)
+            }
+        })
+    }
+
+    async consume4() {
         if (!this.channel) throw new Error('No conectado')
 
         this.logger.info(`Consumiento desde "${this.queue}"`)

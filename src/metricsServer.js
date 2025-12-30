@@ -1,7 +1,10 @@
 import http from 'node:http'
-import { METRICS_PORT } from './config.js'
+
+import { METRICS_ENABLED, METRICS_PORT } from './config.js'
 
 export function startMetricsServer({ metrics, logger }) {
+    if (!METRICS_ENABLED) return
+
     const server = http.createServer(async (req, res) => {
         if (req.url === '/metrics') {
             const metricsData = await metrics.metrics()

@@ -9,6 +9,6 @@ export class SmartAlarmHandler {
 
         this.logger.info(`Mensaje:\n${JSON.stringify(payload, null, 2)}`)
 
-        this.alarmMetricsService.record(payload)
+        await this.alarmMetricsService.record(payload)
     }
 }
