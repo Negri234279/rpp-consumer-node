@@ -1,3 +1,14 @@
+# [1.4.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.3.0...v1.4.0) (2025-12-30)
+
+
+### Features
+
+* agregar archivo generate-event.js para manejar eventos de alarma en RabbitMQ ([f55c567](https://github.com/Negri234279/rpp-consumer-node/commit/f55c5677135094c349a9be4394f0eafb804e51e6))
+* agregar soporte para exchange en RabbitConsumer y mejorar manejo de mensajes ([9fe576c](https://github.com/Negri234279/rpp-consumer-node/commit/9fe576cb69c485ee087d577d35df854c65d53479))
+* improve error handling by logging uncaught exceptions and unhandled rejections ([f31d489](https://github.com/Negri234279/rpp-consumer-node/commit/f31d48929fda296faf4811c91a1db69e8d287237))
+* improve error logging in shutdown and consumer connection handling ([014c8d9](https://github.com/Negri234279/rpp-consumer-node/commit/014c8d9a0b761752f814b7873b62d984316c4409))
+* update SmartAlarmHandler to record full payload instead of just alarm ([71da900](https://github.com/Negri234279/rpp-consumer-node/commit/71da900cee295e23317cbf09d683851957852dad))
+
 # [1.3.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.2.0...v1.3.0) (2025-12-29)
 
 
