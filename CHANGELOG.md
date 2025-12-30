@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.4.0...v1.5.0) (2025-12-30)
+
+
+### Features
+
+* agregar manejo de métricas y registro de alarmas ([d7333b6](https://github.com/Negri234279/rpp-consumer-node/commit/d7333b6a406764968dffff987e13883730746542))
+* eliminar método consume4 de RabbitConsumer ([d796e35](https://github.com/Negri234279/rpp-consumer-node/commit/d796e35a0139d171621e88e44e9e9b7cae76ceb8))
+
 # [1.4.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.3.0...v1.4.0) (2025-12-30)
 
 
