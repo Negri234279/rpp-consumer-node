@@ -69,26 +69,6 @@ export class RabbitConsumer {
         })
     }
 
-    async consume4() {
-        if (!this.channel) throw new Error('No conectado')
-
-        this.logger.info(`Consumiento desde "${this.queue}"`)
-        this.consuming = true
-
-        await this.channel.consume(this.queue, async (msg) => {
-            if (!msg || !this.consuming) return
-
-            try {
-                const payload = JSON.parse(msg.content.toString())
-                await this.handler?.handle(payload)
-                this.channel.ack(msg)
-            } catch (err) {
-                this.logger.error(err)
-                this.channel.nack(msg, false, false)
-            }
-        })
-    }
-
     async sendToQueue(message) {
         if (!this.channel) throw new Error('No conectado')
 
