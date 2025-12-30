@@ -35,7 +35,7 @@ async function shutdown(signal) {
     try {
         await consumer.stop()
     } catch (err) {
-        logger.error(err.message)
+        logger.error(err)
     } finally {
         process.exit(0)
     }
@@ -53,7 +53,13 @@ process.on('unhandledRejection', (err) => {
     logger.error(err)
 })
 
-consumer.start().catch((err) => {
-    logger.error(`Error fatal: ${err.message}`)
-    process.exit(1)
-})
+consumer
+    .connect()
+    .then(async () => {
+        await consumer.consume()
+    })
+    .catch(async (err) => {
+        logger.error(err)
+        await consumer.stop()
+        process.exit(1)
+    })
