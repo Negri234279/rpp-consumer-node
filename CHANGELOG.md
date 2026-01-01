@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.5.0...v1.6.0) (2026-01-01)
+
+
+### Features
+
+* refactor HttpServer to use class-based structure and improve error handling ([8823d73](https://github.com/Negri234279/rpp-consumer-node/commit/8823d73cc343e5feaad20dbf17d04e86b8896988))
+
 # [1.5.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.4.0...v1.5.0) (2025-12-30)
 
 
