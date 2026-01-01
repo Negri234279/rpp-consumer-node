@@ -2,7 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { RABBITMQ_URL } from './infra/config/config.js'
-import { startHttpServer } from './infra/http/httpServer.js'
+import { HttpServer } from './infra/http/httpServer.js'
 import { HandlerFactory } from './infra/messaging/handlers/handlerFactory.js'
 import { RabbitMQBroker } from './infra/messaging/RabbitMQBroker.js'
 import { ConsoleLogger } from './infra/monitoring/ConsoleLogger.js'
@@ -15,8 +15,6 @@ const CONSUMER_LOG_PATH = path.resolve(__dirname, '../logs/rpp-consumer-node.log
 
 const logger = new ConsoleLogger({ path: CONSUMER_LOG_PATH })
 const metricsRecorder = new PrometheusMetrics({ logger })
-
-startHttpServer({ metrics: metricsRecorder, logger })
 
 const handlerFactory = new HandlerFactory({
     logger,
@@ -33,20 +31,35 @@ const broker = new RabbitMQBroker({
     metricsRecorder,
 })
 
+const httpServer = new HttpServer({
+    metricsRecorder,
+    logger,
+})
+
+try {
+    await broker.connect()
+    await httpServer.start()
+
+    await broker.consuming()
+
+    logger.success('✅ Aplicación iniciada correctamente')
+} catch (error) {
+    logger.error('❌ Error al iniciar aplicación:', error)
+    process.exit(1)
+}
+
 async function shutdown(signal) {
     logger.info(`Señal ${signal} recibida`)
 
     try {
         await broker.stop()
+        await httpServer.stop()
     } catch (err) {
         logger.error('Error durante shutdown:', err)
     } finally {
         process.exit(0)
     }
 }
-
-process.on('SIGINT', shutdown)
-process.on('SIGTERM', shutdown)
 
 process.on('uncaughtException', (err) => {
     logger.error('Uncaught exception:', err)
@@ -57,11 +70,5 @@ process.on('unhandledRejection', (err) => {
     logger.error('Unhandled rejection:', err)
 })
 
-try {
-    await broker.connect()
-    await broker.consuming()
-    logger.success('✅ Aplicación iniciada correctamente')
-} catch (error) {
-    logger.error('❌ Error al iniciar aplicación:', error)
-    process.exit(1)
-}
+process.on('SIGINT', shutdown)
+process.on('SIGTERM', shutdown)
