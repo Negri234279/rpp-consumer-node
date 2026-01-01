@@ -1,6 +1,9 @@
 import { collectDefaultMetrics, Counter, Histogram, register } from 'prom-client'
 
-export class PrometheusMetrics {
+import { IMetricsRecorder } from '../../application/ports/output/IMetricsRecorder.js'
+import { METRICS_ENABLED } from '../config/config.js'
+
+export class PrometheusMetrics extends IMetricsRecorder {
     alarmsTotal
     alarmsByServer
     alarmsByDay
@@ -9,7 +12,13 @@ export class PrometheusMetrics {
     alarmProcessingSuccessDuration
     alarmProcessingErrorDuration
 
+    /**
+     * @param {Object} param0
+     * @param {import('../../application/ports/output/ILogger.js').ILogger} param0.logger
+     */
     constructor({ logger }) {
+        super()
+        
         this.logger = logger
 
         collectDefaultMetrics()
@@ -55,24 +64,33 @@ export class PrometheusMetrics {
     }
 
     recordSuccess(durationSeconds) {
+        if (!METRICS_ENABLED) return
+
         this.alarmProcessingSuccessDuration.observe(durationSeconds)
         this.alarmsProcessed.inc()
     }
 
     recordFailure(durationSeconds) {
+        if (!METRICS_ENABLED) return
+
         this.alarmProcessingErrorDuration.observe(durationSeconds)
         this.alarmsFailed.inc()
     }
 
-    registerAlarm({ server, date }) {
-        this.alarmsTotal.inc()
-        this.alarmsByServer.inc({ server })
-        this.alarmsByDay.inc({ date })
+    /**
+     * @param {import('../../domain/Alarm').Alarm} alarm
+     */
+    registerAlarm(alarm) {
+        if (!METRICS_ENABLED) return
 
-        this.logger.info(`Metric registered for alarm from server: ${server} on date: ${date}`)
+        this.alarmsTotal.inc()
+        this.alarmsByServer.inc({ server: alarm.server })
+        this.alarmsByDay.inc({ date: alarm.getDate() })
+        
+        this.logger.info(`Metric registered for alarm from server: ${alarm.server} on date: ${alarm.getDate()}`)
     }
 
     async metrics() {
-        return register.metrics()
+        return METRICS_ENABLED ? register.metrics() : ''
     }
 }

@@ -1,42 +1,45 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { AlarmMetricsService } from './AlarmMetricsService.js'
-import { RABBITMQ_URL } from './config.js'
-import { SmartAlarmHandler } from './handlers/SmartAlarmHandler.js'
-import { Logger } from './Logger.js'
-import { startMetricsServer } from './metricsServer.js'
-import { PrometheusMetrics } from './PrometheusMetrics.js'
-import { RabbitConsumer } from './providers/RabbitConsumer.js'
+import { RABBITMQ_URL } from './infra/config/config.js'
+import { startHttpServer } from './infra/http/httpServer.js'
+import { HandlerFactory } from './infra/messaging/handlers/handlerFactory.js'
+import { RabbitMQBroker } from './infra/messaging/RabbitMQBroker.js'
+import { ConsoleLogger } from './infra/monitoring/ConsoleLogger.js'
+import { PrometheusMetrics } from './infra/monitoring/PrometheusMetrics.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const CONSUMER_LOG_PATH = path.resolve(__dirname, '../logs/rpp-consumer-node.log')
 
-const logger = new Logger({ path: CONSUMER_LOG_PATH })
-const metrics = new PrometheusMetrics({ logger })
+const logger = new ConsoleLogger({ path: CONSUMER_LOG_PATH })
+const metricsRecorder = new PrometheusMetrics({ logger })
 
-startMetricsServer({ metrics, logger })
+startHttpServer({ metrics: metricsRecorder, logger })
 
-const alarmMetricsService = new AlarmMetricsService({ metrics, logger })
-const smartAlarmHandler = new SmartAlarmHandler({ logger, alarmMetricsService })
+const handlerFactory = new HandlerFactory({
+    logger,
+    metricsRecorder,
+})
 
-const consumer = new RabbitConsumer({
+const smartAlarmHandler = handlerFactory.createSmartAlarmHandler()
+
+const broker = new RabbitMQBroker({
     url: RABBITMQ_URL,
     queue: 'rustplus_alarms',
+    messageConsumerHandler: smartAlarmHandler,
     logger,
-    handler: smartAlarmHandler,
-    prometheusMetrics: metrics,
+    metricsRecorder,
 })
 
 async function shutdown(signal) {
     logger.info(`Señal ${signal} recibida`)
 
     try {
-        await consumer.stop()
+        await broker.stop()
     } catch (err) {
-        logger.error(err)
+        logger.error('Error durante shutdown:', err)
     } finally {
         process.exit(0)
     }
@@ -46,21 +49,19 @@ process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 
 process.on('uncaughtException', (err) => {
-    logger.error(err)
+    logger.error('Uncaught exception:', err)
     process.exit(1)
 })
 
 process.on('unhandledRejection', (err) => {
-    logger.error(err)
+    logger.error('Unhandled rejection:', err)
 })
 
-consumer
-    .connect()
-    .then(async () => {
-        await consumer.consume()
-    })
-    .catch(async (err) => {
-        logger.error(err)
-        await consumer.stop()
-        process.exit(1)
-    })
+try {
+    await broker.connect()
+    await broker.consuming()
+    logger.success('✅ Aplicación iniciada correctamente')
+} catch (error) {
+    logger.error('❌ Error al iniciar aplicación:', error)
+    process.exit(1)
+}

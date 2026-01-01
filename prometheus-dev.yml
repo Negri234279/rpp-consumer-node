@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'rpp_rabbitmq_dev'
+    static_configs:
+      - targets: ['rpp_rabbitmq_dev:15692']
+
+  - job_name: 'rpp_consumer_node_dev'
+    static_configs:
+      - targets: ['rpp_consumer_node_dev:9100']
