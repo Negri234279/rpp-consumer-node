@@ -32,9 +32,10 @@ FROM base AS dev
 
 ENV NODE_ENV="development"
 
-RUN npm install
+COPY ./src ./src
+COPY ./scripts ./scripts
 
-COPY src scripts ./
+RUN npm install
 
 RUN chown -R runner:runner /app
 
@@ -49,9 +50,10 @@ FROM base AS prod
 
 ENV NODE_ENV="production"
 
-RUN npm ci --omit=dev --ignore-scripts
+COPY ./src ./src
+COPY ./scripts ./scripts
 
-COPY src scripts ./
+RUN npm ci --omit=dev --ignore-scripts
 
 RUN chown -R runner:runner /app
 

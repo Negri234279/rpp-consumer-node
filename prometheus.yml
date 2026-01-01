@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'rpp_rabbitmq_prod'
+    static_configs:
+      - targets: ['rpp_rabbitmq_prod:15692']
+
+  - job_name: 'rpp_consumer_node_prod'
+    static_configs:
+      - targets: ['rpp_consumer_node_prod:9100']
