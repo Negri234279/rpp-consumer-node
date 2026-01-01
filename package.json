@@ -6,6 +6,8 @@
   "scripts": {
     "start:prod": "node src/main.js",
     "start:dev": "nodemon src/main.js",
+    "seed": "node scripts/seedSmartAlarms.js 1",
+    "seed:multiple": "node scripts/seedSmartAlarms.js 5",
     "prepare": "husky"
   },
   "dependencies": {

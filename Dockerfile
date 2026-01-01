@@ -34,7 +34,7 @@ ENV NODE_ENV="development"
 
 RUN npm install
 
-COPY src ./src
+COPY src scripts ./
 
 RUN chown -R runner:runner /app
 
@@ -51,7 +51,7 @@ ENV NODE_ENV="production"
 
 RUN npm ci --omit=dev --ignore-scripts
 
-COPY src ./src
+COPY src scripts ./
 
 RUN chown -R runner:runner /app
 

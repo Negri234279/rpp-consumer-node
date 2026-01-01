@@ -101,27 +101,6 @@ this.alarmsByDay = new Counter({
 
 ---
 
-### Docker Compose with Metrics
-
-Example configuration exposing the metrics port:
-
-```yaml
-services:
-  rpp-consumer-node:
-    image: negrii/rpp-consumer-node:latest
-    container_name: rpp-consumer-node
-    env_file:
-      - .env
-    restart: unless-stopped
-    ports:
-      - "9100:9100"  # Prometheus metrics endpoint (optional)
-    volumes:
-      - rpp-consumer-node-logs:/app/logs
-
-volumes:
-  rpp-consumer-node-logs:
-```
-
 ### Prometheus Scrape Configuration
 
 Add this job to your `prometheus.yml`:
@@ -163,14 +142,38 @@ v1.1.0
 
 ### 1️⃣ 🧠 Environment variables
 
-| Variable          | Description                                      |
-| ----------------- | ------------------------------------------------ |
-| RABBITMQ_HOST     | RabbitMQ host                                    |
-| RABBITMQ_PORT     | RabbitMQ port                                    |
-| RABBITMQ_USER     | RabbitMQ username                                |
-| RABBITMQ_PASSWORD | RabbitMQ password                                |
-| METRICS_ENABLED   | Enable Prometheus metrics (true/false)           |
-| METRICS_PORT      | Port for Prometheus metrics endpoint (9100)      |
+| Variable          | Description                                      | Default       |
+| ----------------- | ------------------------------------------------ | ------------- |
+| RABBITMQ_HOST     | RabbitMQ host                                    | -             |
+| RABBITMQ_PORT     | RabbitMQ port                                    | -             |
+| RABBITMQ_USER     | RabbitMQ username                                | -             |
+| RABBITMQ_PASSWORD | RabbitMQ password                                | -             |
+| METRICS_ENABLED   | Enable Prometheus metrics (true/false)           | false         |
+| METRICS_PORT      | Port for Prometheus metrics endpoint             | 9100          |
+| TZ                | Timezone for logs ([IANA timezone database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List))       | Europe/Madrid |
+| LOCALE            | Unicode BCP 47 locale identifier for formatting  | es-ES         |
+
+#### ℹ️ About LOCALE
+
+The `LOCALE` variable uses the **Unicode BCP 47 locale identifier** standard ([Unicode TR35](https://unicode.org/reports/tr35/#bcp-47-conformance)). This determines how dates, times, and numbers are formatted in logs.
+
+**Common values:**
+- `es-ES` - Spanish (Spain)
+- `en-US` - English (United States)
+- `en-GB` - English (United Kingdom)
+- `fr-FR` - French (France)
+- `de-DE` - German (Germany)
+- `pt-BR` - Portuguese (Brazil)
+
+**Format example with `es-ES`:**
+```
+[31/12/2025 23:45:30] [INFO] Smart alarm processed for server: Rustopia
+```
+
+**Format example with `en-US`:**
+```
+[12/31/2025 11:45:30] [INFO] Smart alarm processed for server: Rustopia
+```
 
 ---
 
@@ -193,11 +196,24 @@ services:
   rpp-consumer-node:
     image: negrii/rpp-consumer-node:latest
     container_name: rpp-consumer-node
+    ports:
+      - '9100:9100' # Expose to the host the prometheus metrics
     env_file:
       - .env
     restart: unless-stopped
     volumes:
       - rpp-consumer-node-logs:/app/logs
+
+  # If enable the prometheus metrics
+  rpp_prometheus:
+    container_name: rpp_prometheus
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - rpp_prometheus_data:/prometheus
   
 volumes:
   rpp-consumer-node-logs:
