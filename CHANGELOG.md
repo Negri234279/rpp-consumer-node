@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.7.0...v1.8.0) (2026-01-06)
+
+
+### Features
+
+* agregar configuración de Docker y Prometheus para producción ([fb3f26f](https://github.com/Negri234279/rpp-consumer-node/commit/fb3f26f16d7bd745ec5f1e93e71a6e9933a04f49))
+
 # [1.7.0](https://github.com/Negri234279/rpp-consumer-node/compare/v1.6.0...v1.7.0) (2026-01-01)
 
 
