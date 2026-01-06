@@ -1,0 +1,49 @@
+services:
+  rpp_consumer_node_prod:
+    container_name: rpp_consumer_node_prod
+    build:
+      context: ../
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        VERSION: dev
+    depends_on:
+      - rpp_rabbitmq_prod
+    ports:
+      - '9100:9100'
+    volumes:
+      - rpp_consumer_node_logs:/app/logs
+    environment:
+      - RABBITMQ_HOST=rpp_rabbitmq_prod
+      - CHOKIDAR_USEPOLLING=true
+    env_file: .env
+
+  rpp_rabbitmq_prod:
+    container_name: rpp_rabbitmq_prod
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+      - '15692:15692'
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    env_file: .env
+    command: bash -c "rabbitmq-plugins enable --offline rabbitmq_prometheus && rabbitmq-server"
+
+  rpp_prometheus:
+    container_name: rpp_prometheus
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - rpp_prometheus_data:/prometheus
+
+volumes:
+  rabbitmq_data: null
+  rpp_consumer_node_logs: null
+  rpp_prometheus_data: null
